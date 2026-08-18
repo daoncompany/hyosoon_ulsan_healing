@@ -259,7 +259,7 @@
     });
     if (!noteItems.length && c.note) noteItems.push('<div class="kv">' + esc(c.note) + '</div>');
     var noteHtml = noteItems.length
-      ? '<details class="note-box"><summary>비고 (' + noteItems.length + ')</summary>' + noteItems.join('') + '</details>'
+      ? '<details class="note-box"><summary>비고</summary>' + noteItems.join('') + '</details>'
       : '';
 
     return '' +
