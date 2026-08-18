@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>효소온 고객카드</title>
+<!-- PWA / 앱 아이콘 설정 -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3A2B1D">
+<link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png">
+<link rel="icon" href="img/icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Signature Pad CDN 추가 -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<style>
+  :root{
+    --brown-900:#3A2B1D;
+    --brown-700:#4A3220;
+    --brown-600:#6B4A2F;
+    --brown-400:#9C7C58;
+    --brown-200:#E8DDD0;
+    --brown-100:#F3EBE1;
+    --cream:#FAF6F0;
+    --white:#FFFFFF;
+    --ink:#3A2B1D;
+    --muted2:#9C8B78;
+    --danger:#B5573C;
+    --ok:#5C7A5E;
+    --shadow: 0 10px 30px rgba(74,50,32,0.08), 0 2px 8px rgba(74,50,32,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--cream);
+    font-family:'Noto Sans KR', -apple-system, 'Malgun Gothic', sans-serif;
+    color: var(--ink);
+    min-height:100vh;
+    padding-bottom: 80px;
+    overflow-x:hidden;
+  }
+  .wrap{ max-width:640px; margin:0 auto; padding: 0 18px; }
+
+  /* Header — full-bleed editorial hero */
+  .header{
+    position:relative;
+    overflow:hidden;
+    padding: 30px 24px 96px;
+    text-align:center;
+    background: #3A2B1D;
+    color:#fff;
+  }
+  .header .hero-bg{
+    position:absolute; inset:0;
+    background-image:url("img/bg01.png");
+    background-size:cover;
+    background-position:center;
+    opacity:.7;
+    z-index:0;
+  }
+  .header .hero-scrim{
+    position:absolute; inset:0;
+    z-index:1;
+    background:
+      radial-gradient(65% 55% at 12% 8%, rgba(255,205,150,0.30), transparent 60%),
+      radial-gradient(55% 45% at 88% 12%, rgba(255,255,255,0.10), transparent 55%),
+      radial-gradient(70% 55% at 80% 100%, rgba(0,0,0,0.40), transparent 60%),
+      radial-gradient(50% 40% at 8% 95%, rgba(0,0,0,0.35), transparent 60%),
+      linear-gradient(155deg, rgba(138,106,69,0.75) 0%, rgba(107,74,47,0.8) 38%, rgba(74,50,32,0.85) 72%, rgba(58,43,29,0.92) 100%);
+  }
+  .header::before{
+    content:"";
+    position:absolute; inset:0;
+    z-index:2;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity:.22;
+    mix-blend-mode: overlay;
+    pointer-events:none;
+  }
+  .header::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:0; height:120px;
+    z-index:3;
+    background: linear-gradient(180deg, transparent, rgba(35,25,16,0.35));
+    pointer-events:none;
+  }
+  .header > *{ position:relative; z-index:4; }
+  .header .top-bar{
+    display:flex; align-items:center; justify-content:space-between;
+    max-width: 640px; margin: 0 auto 46px;
+  }
+  .header .brandmark{
+    display:flex; align-items:center; gap:8px;
+    font-family:'Noto Serif KR', serif; font-weight:700; font-size:15px;
+    letter-spacing:0.06em;
+    color: rgba(255,255,255,0.92);
+  }
+  .header .brandmark img{
+    height: 80px;
+    width:auto;
+    display:block;
+  }
+  .header .brandmark .mark{
+    width:26px;height:26px;border-radius:50%;
+    background: rgba(255,255,255,0.16);
+    display:flex;align-items:center;justify-content:center;
+    font-size: 13px;
+  }
+  .header .top-tag{
+    font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase;
+    color: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius:999px; padding: 5px 12px;
+  }
+  .header h1{
+    font-family:'Noto Serif KR', serif;
+    font-weight:500;
+    font-size: 36px;
+    line-height:1.28;
+    letter-spacing: 0.01em;
+    margin: 0 auto 14px;
+    max-width: 320px;
+  }
+  .header .eyebrow{
+    display:block;
+    margin: 0 0 18px;
+    font-size:10.5px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color: rgba(255,255,255,0.6);
+  }
+  .header p.sub{
+    margin: 0 auto;
+    max-width: 300px;
+    font-size:13px;
+    line-height:1.7;
+    color: rgba(255,255,255,0.78);
+    letter-spacing: 0.01em;
+  }
+
+  /* Card */
+  .card{
+    background: var(--white);
+    border-radius: 20px;
+    padding: 24px 22px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    border: 1px solid rgba(74,50,32,0.05);
+  }
+  .card + .card{ margin-top: 0; }
+  .float-card{
+    position:relative; z-index:3;
+    margin-top: -66px;
+    box-shadow: 0 24px 48px rgba(35,25,16,0.22), 0 4px 14px rgba(35,25,16,0.1);
+  }
+  .section-title{
+    font-family:'Noto Serif KR', serif;
+    font-weight:700;
+    font-size: 18px;
+    color: var(--brown-700);
+    margin: 0 0 4px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-title .badge{
+    font-size:11px; font-weight:700; color:#fff;
+    background: var(--brown-600);
+    border-radius: 999px; padding: 2px 9px;
+    letter-spacing: 0.02em;
+  }
+  .section-sub{ font-size:12.5px; color: var(--muted2); margin: 0 0 18px; line-height:1.5; }
+
+  .field{ margin-bottom: 18px; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{
+    display:block; font-size: 13.5px; font-weight:700; color: var(--brown-700);
+    margin-bottom: 8px;
+  }
+  .field label .req{ color: var(--danger); margin-left:3px; }
+  .field label .opt{ color: var(--muted2); font-weight:400; font-size:11.5px; margin-left:5px; }
+
+  input[type="text"], input[type="tel"], input[type="date"], textarea{
+    width:100%;
+    border: 1.5px solid var(--brown-200);
+    background: var(--cream);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--ink);
+    outline:none;
+    transition: border-color .15s, background .15s;
+  }
+  input[type="text"]:focus, input[type="tel"]:focus, input[type="date"]:focus, textarea:focus{
+    border-color: var(--brown-600);
+    background: #fff;
+  }
+  textarea{ min-height: 88px; resize: vertical; line-height:1.5; }
+  input.err, textarea.err{ border-color: var(--danger); background:#FBF1EE; }
+
+  /* 서명 캔버스 관련 스타일 추가 */
+  .signature-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    border: 1.5px solid var(--brown-200);
+    border-radius: 12px;
+    background: #fff;
+    touch-action: none; /* 태블릿 스크롤 방지 */
+    overflow: hidden;
+  }
+  .signature-wrapper.err {
+    border-color: var(--danger);
+    background: #FBF1EE;
+  }
+  .signature-wrapper canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .signature-tools {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+  }
+  .btn-clear {
+    background: transparent;
+    border: 1px solid var(--brown-400);
+    color: var(--brown-700);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-clear:active { background: var(--brown-100); }
+
+  /* pill choice group */
+  .choices{ display:flex; flex-wrap:wrap; gap:8px; }
+  .choices.stack{ flex-direction:column; }
+  .pill{
+    position:relative;
+  }
+  .pill input{ position:absolute; inset:0; opacity:0; width:100%; height:100%; margin:0; cursor:pointer; z-index:1; }
+  .pill span{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding: 10px 16px;
+    border: 1.5px solid var(--brown-200);
+    border-radius: 12px;
+    font-size: 14px; font-weight:500;
+    color: var(--brown-700);
+    background: var(--cream);
+    cursor:pointer;
+    transition: all .15s;
+    width:100%;
+  }
+  .pill input:checked + span{
+    background: var(--brown-600);
+    border-color: var(--brown-600);
+    color:#fff;
+    font-weight:700;
+  }
+  .choices.grow .pill{ flex:1 1 0; min-width: 78px; }
+  .choices.err .pill span{ border-color: var(--danger); background:#FBF1EE; }
+
+  /* yes/no row for checklist */
+  .yn-item{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--brown-100);
+  }
+  .yn-item:last-child{ border-bottom:none; }
+  .yn-item p{ margin:0; font-size:14px; line-height:1.45; color: var(--ink); flex:1; }
+  .yn-choices{ display:flex; gap:6px; flex-shrink:0; }
+  .yn-choices .pill span{ padding: 8px 14px; font-size:13px; min-width:52px; }
+
+  /* checkbox agree rows */
+  .agree{
+    display:flex; align-items:flex-start; gap:10px;
+    padding: 12px 0;
+    cursor:pointer;
+  }
+  .agree input{ margin-top: 3px; width:18px; height:18px; accent-color: var(--brown-600); flex-shrink:0; }
+  .agree span{ font-size: 13.5px; line-height:1.55; color: var(--ink); }
+  .agree-box{
+    background: var(--brown-100);
+    border-radius: 14px;
+    padding: 4px 16px;
+    border: 1.5px solid transparent;
+  }
+  .agree-box.err{ border-color: var(--danger); background:#FBF1EE; }
+  .agree-box .agree + .agree{ border-top: 1px solid rgba(74,50,32,0.08); }
+
+  .note-box{
+    background: var(--brown-100);
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--brown-700);
+    white-space: pre-line;
+  }
+
+  .other-input{ margin-top:8px; display:none; }
+  .other-input.show{ display:block; }
+
+  /* Conditional section wrapper */
+  .conditional{
+    display:none;
+    margin-top:0;
+    animation: fadeIn .25s ease;
+  }
+  .conditional.open{ display:block; margin-top:16px; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:translateY(0); } }
+
+  .submit-bar{
+    position: sticky; bottom:0; left:0; right:0;
+    padding: 14px 18px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(250,246,240,0) 0%, var(--cream) 30%);
+    margin-top: -6px;
+  }
+  .btn-submit{
+    width:100%;
+    background: var(--brown-600);
+    color:#fff;
+    border:none;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight:700;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+    cursor:pointer;
+    box-shadow: 0 8px 20px rgba(107,74,47,0.3);
+    transition: transform .1s, box-shadow .1s, opacity .15s;
+  }
+  .btn-submit:active{ transform: translateY(1px); box-shadow: 0 4px 10px rgba(107,74,47,0.25); }
+  .btn-submit:disabled{ opacity:.6; cursor:not-allowed; }
+  .hint-error{
+    text-align:center; color: var(--danger); font-size:12.5px; margin: 10px 0 0; display:none;
+  }
+  .hint-error.show{ display:block; }
+
+  /* Success overlay */
+  .overlay{
+    position:fixed; inset:0; background: rgba(58,43,29,0.55);
+    display:none; align-items:center; justify-content:center; padding:20px;
+    z-index:50;
+  }
+  .overlay.show{ display:flex; }
+  .success-card{
+    background:#fff; border-radius:22px; padding: 40px 28px; text-align:center;
+    max-width: 360px; width:100%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  }
+  .check-circle{
+    width:68px;height:68px;border-radius:50%;
+    background: var(--ok);
+    display:flex;align-items:center;justify-content:center;
+    margin: 0 auto 18px;
+    color:#fff; font-size:34px;
+    animation: pop .35s ease;
+  }
+  @keyframes pop{ 0%{transform:scale(0);} 70%{transform:scale(1.12);} 100%{transform:scale(1);} }
+  .success-card h2{ font-family:'Noto Serif KR', serif; font-size:20px; margin:0 0 8px; color:var(--brown-700); }
+  .success-card p{ font-size:13.5px; color:var(--muted2); margin:0 0 22px; line-height:1.6; }
+  .btn-close{
+    background: var(--brown-600); color:#fff; border:none; border-radius:12px;
+    padding:12px 28px; font-size:14px; font-weight:700; font-family:inherit; cursor:pointer;
+  }
+  .loading{
+    position:fixed; inset:0; background: rgba(58,43,29,0.35);
+    display:none; align-items:center; justify-content:center; z-index:60;
+  }
+  .loading.show{ display:flex; }
+  .spinner{
+    width:38px;height:38px;border-radius:50%;
+    border: 4px solid rgba(255,255,255,0.4);
+    border-top-color:#fff;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hero-bg"></div>
+  <div class="hero-scrim"></div>
+  <div class="top-bar">
+    <div class="brandmark"><img src="img/logo_w.png" alt="효소온"></div>
+    <div class="top-tag">HYOSOON CARD</div>
+  </div>
+  <span class="eyebrow">Wellness &amp; Detox Studio</span>
+  <h1>몸과 마음의<br>균형을 찾는 시간</h1>
+  <p class="sub">고객카드 작성 &amp; 방문 관리 기록<br>효소온과 함께 오늘도 편안한 하루 되세요</p>
+</div>
+
+<div class="wrap">
+
+  <form id="gform" method="POST" target="hidden_iframe" novalidate>
+
+    <!-- 안내 -->
+    <div class="card float-card">
+      <div class="section-title">이용 안내</div>
+      <div class="note-box">정액권 / 회원권의 사용 기한은 10회의 경우 6개월, 그 이상의 경우 1년이며, 이후 자동 소멸됩니다.
+환불은 계약 후 30일 이내 가능하며, 30일 이후는 불가합니다.
+        사용한 경우 비회원가로 환산하여 환불됩니다.
+회원 등록 후 환불은 남은 횟수에 대해서만 환불합니다.
+
+만약 특별 프로모션으로 회원등록한 경우 이미 사용한 횟수는 비회원가를 적용하여 환불합니다.
+(카드 수수료 및 부가세를 제외한 금액을 환불)</div>
+    </div>
+
+    <!-- 공통정보 -->
+    <div class="card">
+      <div class="section-title">기본 정보</div>
+      <p class="section-sub">방문하시는 분의 정보를 입력해주세요.</p>
+
+      <div class="field">
+        <label>성함<span class="req">*</span></label>
+        <input type="text" id="f_name" name="entry.1819944395" placeholder="홍길동" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>성별<span class="req">*</span></label>
+        <div class="choices grow" id="genderGroup">
+          <label class="pill"><input type="radio" name="entry.1120119511" value="여성"><span>여성</span></label>
+          <label class="pill"><input type="radio" name="entry.1120119511" value="남성"><span>남성</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>생년월일<span class="req">*</span></label>
+        <input type="text" id="f_birth" inputmode="numeric" pattern="[0-9]*" maxlength="10" placeholder="숫자만 입력 (예: 19950217)" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>휴대폰<span class="opt">(선택)</span></label>
+        <input type="tel" id="f_phone" name="entry.1256998442" placeholder="010-0000-0000" maxlength="13" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>주소<span class="opt">(선택)</span></label>
+        <input type="text" name="entry.137180333" placeholder="주소를 입력해주세요" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label>방문경로<span class="opt">(선택)</span></label>
+        <div class="choices grow" id="visitRouteGroup">
+          <label class="pill"><input type="radio" name="entry.877086558" value="네이버"><span>네이버</span></label>
+          <label class="pill"><input type="radio" name="entry.877086558" value="당근"><span>당근</span></label>
+          <label class="pill"><input type="radio" name="entry.877086558" value="인스타"><span>인스타</span></label>
+          <label class="pill"><input type="radio" name="entry.877086558" value="지인소개"><span>지인소개</span></label>
+          <label class="pill"><input type="radio" name="entry.877086558" value="" id="routeOtherRadio"><span>기타</span></label>
+        </div>
+        <input type="text" id="routeOtherText" class="other-input" placeholder="방문 경로를 입력해주세요">
+      </div>
+
+      <div class="field">
+        <label>재방문여부<span class="req">*</span></label>
+        <div class="choices" id="revisitGroup">
+          <label class="pill" style="flex:1"><input type="radio" name="entry.706235477" value="첫 방문 입니다." id="rv_first"><span>첫 방문 입니다</span></label>
+          <label class="pill" style="flex:1"><input type="radio" name="entry.706235477" value="재방문 입니다." id="rv_again"><span>재방문 입니다</span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 첫방문 전용 -->
+    <div class="conditional" id="firstVisitSection">
+      <!-- 체크리스트(토글형) 비활성화
+      <div class="card">
+        <div class="section-title">체크리스트 <span class="badge">첫 방문</span></div>
+        <p class="section-sub">해당 사항에 체크해주세요.</p>
+        <div id="checklistWrap"></div>
+      </div>
+
+      -->
+
+      <div class="card">
+        <div class="section-title">서비스 이용 동의</div>
+        <div class="agree-box">
+          <label class="agree"><input type="checkbox" name="entry.924576383" value="서비스의 만족도는 개인차에 따라 다를 수 있습니다."><span>서비스의 만족도는 개인차에 따라 다를 수 있습니다.</span></label>
+          <label class="agree"><input type="checkbox" name="entry.924576383" value="명현반응이 나타날 수 있으며, 이 경우 필요에 따라 의사의 처방과 치료가 필요할 수도 있음을 숙지하였습니다."><span>명현반응이 나타날 수 있으며, 이 경우 필요에 따라 의사의 처방과 치료가 필요할 수도 있음을 숙지하였습니다.</span></label>
+          <label class="agree"><input type="checkbox" name="entry.924576383" value="서비스에 대한 세부내용 설명은 충분히 들었으며 충분한 상담 후 본인의 결정으로 동의하여 서비스를 받습니다."><span>서비스에 대한 세부내용 설명은 충분히 들었으며 충분한 상담 후 본인의 결정으로 동의하여 서비스를 받습니다.</span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">정액권 등록</div>
+        <div class="field">
+          <label>정액권 종류<span class="req">*</span></label>
+          <div class="choices grow">
+            <label class="pill"><input type="radio" name="entry.2032403882" value="5회"><span>5회</span></label>
+            <label class="pill"><input type="radio" name="entry.2032403882" value="10회"><span>10회</span></label>
+            <label class="pill"><input type="radio" name="entry.2032403882" value="20회"><span>20회</span></label>
+            <label class="pill"><input type="radio" name="entry.2032403882" value="30회"><span>30회</span></label>
+          </div>
+          <p class="section-sub" style="margin:8px 0 0;">구매일은 등록하시는 오늘 날짜로 자동 저장됩니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 재방문 전용 -->
+    <div class="conditional" id="revisitSection">
+      <div class="card">
+        <div class="section-title">방문 관리 <span class="badge">재방문</span></div>
+
+        <div class="field">
+          <label>추가결제 회원권<span class="opt">(오늘 추가로 구매한 경우에만 선택)</span></label>
+          <div class="choices grow">
+            <label class="pill"><input type="radio" name="entry.1388254791" value="없음" checked><span>없음</span></label>
+            <label class="pill"><input type="radio" name="entry.1388254791" value="5회"><span>5회</span></label>
+            <label class="pill"><input type="radio" name="entry.1388254791" value="10회"><span>10회</span></label>
+            <label class="pill"><input type="radio" name="entry.1388254791" value="20회"><span>20회</span></label>
+            <label class="pill"><input type="radio" name="entry.1388254791" value="30회"><span>30회</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>원하시는 관리내용<span class="opt">(선택)</span></label>
+          <textarea name="entry.1963003494" placeholder="오늘 원하시는 관리 내용을 적어주세요"></textarea>
+        </div>
+
+        <div class="field">
+          <label>비고<span class="opt">(선택)</span></label>
+          <textarea id="f_note" name="entry.390495479" placeholder="특이사항이 있으면 적어주세요"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 건강 상태 체크 (공통: 첫방문/재방문 모두 표시) -->
+    <div class="card">
+      <div class="section-title">건강 상태 체크</div>
+      <p class="section-sub">해당하는 사항이 있으면 모두 선택해주세요.</p>
+      <div class="agree-box" id="healthGroup">
+        <label class="agree"><input type="checkbox" name="entry.902119748" value="고혈압·저혈압"><span>고혈압·저혈압</span></label>
+        <label class="agree"><input type="checkbox" name="entry.902119748" value="심장질환"><span>심장질환</span></label>
+        <label class="agree"><input type="checkbox" name="entry.902119748" value="임신 가능성"><span>임신 가능성</span></label>
+        <label class="agree"><input type="checkbox" name="entry.902119748" value="당뇨"><span>당뇨</span></label>
+        <label class="agree"><input type="checkbox" name="entry.902119748" value="수술 및 치료 이력"><span>수술 및 치료 이력</span></label>
+        <label class="agree"><input type="checkbox" name="entry.902119748" value="복용 중인 약"><span>복용 중인 약</span></label>
+        <label class="agree"><input type="checkbox" name="entry.902119748" value="알레르기"><span>알레르기</span></label>
+        <label class="agree"><input type="checkbox" name="entry.902119748" value="해당 없음" id="healthNoneCheckbox"><span>해당 없음</span></label>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>기타 특이사항<span class="opt">(선택)</span></label>
+        <input type="text" name="entry.2013651269" placeholder="건강상태 관련 특이사항이 있으면 적어주세요" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- 이용 전 주의사항 (공통, 안내용) -->
+    <div class="card">
+      <div class="section-title">이용 전 주의사항</div>
+      <div class="note-box">음주 후에는 이용이 불가합니다.
+컨디션이 좋지 않으시면 반드시 담당 직원에게 미리 알려주세요.
+이용 중 어지럼증, 호흡곤란, 통증이 느껴지면 즉시 이용을 중단해주세요.
+개인의 신체 상태에 따라 체감되는 반응은 다를 수 있습니다.</div>
+    </div>
+
+    <!-- 명현 반응 안내 (공통, 안내용) -->
+    <div class="card">
+      <div class="section-title">명현 반응 안내</div>
+      <div class="note-box">관리 후 일시적으로 졸림, 피로감, 갈증, 어지러움 등 명현 반응이 나타날 수 있습니다.
+이는 일시적인 현상일 수 있으나, 불편감이 지속되거나 심할 경우 이용을 중단하시고 필요 시 의료기관에 상담하시기 바랍니다.</div>
+    </div>
+
+    <!-- 개인정보 동의 및 서명 영역 -->
+    <div class="card">
+      <div class="section-title">개인정보 수집 및 이용 동의</div>
+      <p class="section-sub">본인은 위 항목의 기재 내용이 사실이며, 효소온에서 제공하는 서비스를 위한 목적으로 개인정보(성함, 생년월일, 연락처, 건강정보 등)를 수집 이용하는 데 동의합니다.</p>
+      <div class="agree-box" style="margin-bottom: 18px;">
+        <label class="agree"><input type="checkbox" id="f_privacy" name="entry.1186764624" value="※수집된 정보는 상담, 관리 서비스 제공 외 다른 용도로 사용되지 않습니다."><span>※수집된 정보는 상담, 관리 서비스 제공 외 다른 용도로 사용되지 않습니다.</span></label>
+        <label class="agree"><input type="checkbox" id="f_healthConsent" name="entry.1983906526" value="본인은 위에서 체크한 건강상태 정보를 효소온 관리 서비스 제공 목적으로 수집·이용하는 데 동의합니다."><span>건강정보 수집·이용에 동의합니다.</span></label>
+        <label class="agree"><input type="checkbox" id="f_noticeConsent" name="entry.624341194" value="이용 전 주의사항(음주 후 이용 금지, 컨디션 이상 시 직원에게 알리기, 어지럼증·호흡곤란·통증 시 즉시 중단 등)과 명현반응 안내(관리 후 졸림·피로감·갈증·일시적 어지러움이 있을 수 있음)를 모두 확인하였습니다."><span>이용 전 주의사항 및 명현반응 안내를 확인하였습니다.</span></label>
+      </div>
+
+      <!-- 서명란 (터치/손가락) -->
+      <div class="field">
+        <label>고객 서명<span class="req">*</span></label>
+        <div class="signature-wrapper" id="sigWrapper">
+          <canvas id="signatureCanvas"></canvas>
+        </div>
+        <div class="signature-tools">
+          <button type="button" class="btn-clear" id="clearSigBtn">서명 다시하기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-bar">
+      <button type="submit" class="btn-submit" id="submitBtn">제출하기</button>
+      <p class="hint-error" id="errorHint">필수 항목을 모두 입력 및 서명해주세요.</p>
+    </div>
+  </form>
+</div>
+
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+<div class="loading" id="loadingOverlay"><div class="spinner"></div></div>
+
+<div class="overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="check-circle">✓</div>
+    <h2>제출되었습니다</h2>
+    <p>소중한 정보 감사합니다.<br>효소온과 함께해주셔서 감사합니다.</p>
+    <button class="btn-close" id="closeSuccessBtn">확인</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  // PWA(홈 화면에 추가/앱 설치)를 위한 서비스 워커 등록. 실패해도 폼 기능에는 영향 없음.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+
+  // 구글폼 응답 URL
+  var FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSeUN9GLMIePt50oyxWOdJgvzdF_qLD7LKyBbyKFq7d9wQEGSQ/formResponse";
+  var form = document.getElementById('gform');
+  form.setAttribute('action', FORM_ACTION);
+
+  // 구글폼에 추가한 "서명" 장문형 질문의 entry ID
+  var SIGNATURE_ENTRY_ID = 'entry.541416302';
+
+  // 서명 데이터를 전송할 hidden input 생성 및 폼 추가
+  var sigHiddenInput = document.createElement('input');
+  sigHiddenInput.type = 'hidden';
+  sigHiddenInput.name = SIGNATURE_ENTRY_ID;
+  form.appendChild(sigHiddenInput);
+
+  var pageHistoryInput = document.createElement('input');
+  pageHistoryInput.type = 'hidden';
+  pageHistoryInput.name = 'pageHistory';
+  form.appendChild(pageHistoryInput);
+
+  // ----------------------------------------------------
+  // 서명 캔버스 (Signature Pad) 설정
+  // ----------------------------------------------------
+  var canvas = document.getElementById('signatureCanvas');
+  var sigWrapper = document.getElementById('sigWrapper');
+  var signaturePad = new SignaturePad(canvas, {
+    backgroundColor: 'rgba(255, 255, 255, 0)',
+    penColor: '#3A2B1D'
+  });
+
+  // 태블릿/모바일 고해상도 대응 캔버스 리사이즈
+  // 구글 시트는 셀 하나에 최대 5만자까지만 저장할 수 있어서, 서명 이미지(base64)가
+  // 그 이상으로 커지지 않도록 배율을 2배로 제한한다(고해상도 기기에서도 용량 폭주 방지).
+  function resizeCanvas() {
+    var ratio = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
+    signaturePad.clear(); // 크기 변경 시 서명 초기화
+  }
+
+  window.addEventListener("resize", resizeCanvas);
+  // 초기화 지연 실행으로 CSS 레이아웃 확정 후 캔버스 너비 잡기
+  setTimeout(resizeCanvas, 100);
+
+  document.getElementById('clearSigBtn').addEventListener('click', function(){
+    signaturePad.clear();
+    sigWrapper.classList.remove('err');
+  });
+
+  /* 체크리스트(토글형) 비활성화
+  // ----------------------------------------------------
+  // 체크리스트 생성
+  // ----------------------------------------------------
+  var CHECKLIST = [
+    { entry: 'entry.999636692', text: '평소 잘 붓고, 아침에 일어나면 몸이 무겁게 느껴진다.' },
+    { entry: 'entry.1307121658', text: '온몸이 찌뿌둥하고 아침 잠이 많다.' },
+    { entry: 'entry.942146157', text: '다이어트를 해도 살이 잘 빠지지 않고, 늘 손발이 차갑다.' },
+    { entry: 'entry.584085753', text: '피부 트러블이 자주 나고, 화장이 잘 먹지 않는 날이 많다.' },
+    { entry: 'entry.2011249463', text: '자꾸 피곤하고 지치며, 숙면을 해도 개운하지 않다.' },
+    { entry: 'entry.279294438', text: '스트레스를 많이 받거나, 예민하고 짜증이 잦아진다.' },
+    { entry: 'entry.2142234905', text: '몸속에 독소가 쌓인 느낌, 변비나 소화불량이 자주 있다.' },
+    { entry: 'entry.897840025', text: '운동을 시작해도 꾸준히 하기 어렵고, 체력에 자신이 없다.' },
+    { entry: 'entry.1310536121', text: '아랫배가 차갑고 생리통이 심하다.' },
+    { entry: 'entry.1997060831', text: '자연스러운 방법으로 건강과 아름다움을 함께 관리하고 싶다.' }
+  ];
+
+  var checklistWrap = document.getElementById('checklistWrap');
+  CHECKLIST.forEach(function(item, idx){
+    var row = document.createElement('div');
+    row.className = 'yn-item';
+    row.innerHTML =
+      '<p>' + item.text + '</p>' +
+      '<div class="yn-choices">' +
+        '<label class="pill"><input type="radio" name="' + item.entry + '" value="네"><span>네</span></label>' +
+        '<label class="pill"><input type="radio" name="' + item.entry + '" value="아니오"><span>아니오</span></label>' +
+      '</div>';
+    checklistWrap.appendChild(row);
+  });
+
+  */
+
+  // 방문경로 - 기타 입력
+  var routeOtherRadio = document.getElementById('routeOtherRadio');
+  var routeOtherText = document.getElementById('routeOtherText');
+  var routeRadios = document.querySelectorAll('input[name="entry.877086558"]');
+  routeRadios.forEach(function(r){
+    r.addEventListener('change', function(){
+      routeOtherText.classList.toggle('show', routeOtherRadio.checked);
+    });
+  });
+  routeOtherText.addEventListener('input', function(){
+    routeOtherRadio.value = routeOtherText.value;
+  });
+
+  // 재방문여부 분기
+  var rvFirst = document.getElementById('rv_first');
+  var rvAgain = document.getElementById('rv_again');
+  var firstSection = document.getElementById('firstVisitSection');
+  var revisitSection = document.getElementById('revisitSection');
+
+  function setRequiredState(container, isActive){
+    var inputs = container.querySelectorAll('input, textarea');
+    inputs.forEach(function(el){ el.disabled = !isActive; });
+  }
+
+  function updateBranch(){
+    if (rvFirst.checked){
+      firstSection.classList.add('open');
+      revisitSection.classList.remove('open');
+      setRequiredState(firstSection, true);
+      setRequiredState(revisitSection, false);
+      pageHistoryInput.value = '0,1';
+    } else if (rvAgain.checked){
+      revisitSection.classList.add('open');
+      firstSection.classList.remove('open');
+      setRequiredState(revisitSection, true);
+      setRequiredState(firstSection, false);
+      pageHistoryInput.value = '0,2';
+    } else {
+      firstSection.classList.remove('open');
+      revisitSection.classList.remove('open');
+      pageHistoryInput.value = '0';
+      setRequiredState(firstSection, false);
+      setRequiredState(revisitSection, false);
+    }
+  }
+  rvFirst.addEventListener('change', updateBranch);
+  rvAgain.addEventListener('change', updateBranch);
+  setRequiredState(firstSection, false);
+  setRequiredState(revisitSection, false);
+
+  // 생년월일 / 구매일: 숫자만 입력하면 자동으로 "YYYY-MM-DD" 형태로 하이픈을 넣어준다.
+  function formatDateDigits(digits){
+    var formatted = digits;
+    if (digits.length > 4) formatted = digits.slice(0,4) + '-' + digits.slice(4,6);
+    if (digits.length > 6) formatted = digits.slice(0,4) + '-' + digits.slice(4,6) + '-' + digits.slice(6,8);
+    return formatted;
+  }
+  function isCompleteDate(str){
+    return /^\d{4}-\d{2}-\d{2}$/.test(str || '');
+  }
+
+  // 생년월일 / 구매일 -> hidden year/month/day 필드로 변환
+  function attachDateHidden(dateInputId, entryBase){
+    var el = document.getElementById(dateInputId);
+    el.addEventListener('input', function(){
+      var digits = el.value.replace(/[^0-9]/g, '').slice(0, 8);
+      el.value = formatDateDigits(digits);
+
+      ['_year','_month','_day'].forEach(function(suffix){
+        var name = entryBase + suffix;
+        var hidden = form.querySelector('input[name="' + name + '"]');
+        if (!hidden){
+          hidden = document.createElement('input');
+          hidden.type = 'hidden';
+          hidden.name = name;
+          form.appendChild(hidden);
+        }
+        hidden.value = '';
+      });
+      if (isCompleteDate(el.value)){
+        var parts = el.value.split('-'); // YYYY-MM-DD
+        form.querySelector('input[name="' + entryBase + '_year"]').value = parts[0];
+        form.querySelector('input[name="' + entryBase + '_month"]').value = String(Number(parts[1]));
+        form.querySelector('input[name="' + entryBase + '_day"]').value = String(Number(parts[2]));
+      }
+    });
+  }
+  attachDateHidden('f_birth', 'entry.289619300');
+
+  // 구매일: 사용자가 직접 입력하지 않고, 정액권 등록 시(제출 시점) 오늘 날짜로 자동 채운다.
+  function setDateHiddenToToday(entryBase){
+    var today = new Date();
+    ['_year','_month','_day'].forEach(function(suffix){
+      var name = entryBase + suffix;
+      var hidden = form.querySelector('input[name="' + name + '"]');
+      if (!hidden){
+        hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = name;
+        form.appendChild(hidden);
+      }
+    });
+    form.querySelector('input[name="' + entryBase + '_year"]').value = today.getFullYear();
+    form.querySelector('input[name="' + entryBase + '_month"]').value = String(today.getMonth() + 1);
+    form.querySelector('input[name="' + entryBase + '_day"]').value = String(today.getDate());
+  }
+
+  // 휴대폰: 숫자만 입력해도 010-0000-0000 형태로 자동으로 하이픈을 넣어준다.
+  var f_phone = document.getElementById('f_phone');
+  f_phone.addEventListener('input', function(){
+    var digits = f_phone.value.replace(/[^0-9]/g, '').slice(0, 11);
+    var formatted = digits;
+    if (digits.length > 7) formatted = digits.slice(0,3) + '-' + digits.slice(3,7) + '-' + digits.slice(7);
+    else if (digits.length > 3) formatted = digits.slice(0,3) + '-' + digits.slice(3);
+    f_phone.value = formatted;
+  });
+
+  // 건강상태 체크: "해당 없음"과 다른 항목은 동시에 선택되지 않도록 처리
+  var healthNoneCheckbox = document.getElementById('healthNoneCheckbox');
+  var healthCheckboxes = document.querySelectorAll('input[name="entry.902119748"]');
+  healthCheckboxes.forEach(function(cb){
+    cb.addEventListener('change', function(){
+      if (cb === healthNoneCheckbox){
+        if (healthNoneCheckbox.checked){
+          healthCheckboxes.forEach(function(other){ if (other !== healthNoneCheckbox) other.checked = false; });
+        }
+      } else if (cb.checked){
+        healthNoneCheckbox.checked = false;
+      }
+    });
+  });
+
+  // 필수값 및 서명 유효성 검사
+  function validate(){
+    var errors = [];
+
+    if (!document.getElementById('f_name').value.trim()) errors.push(document.getElementById('f_name'));
+    if (!document.querySelector('input[name="entry.1120119511"]:checked')) errors.push(document.getElementById('genderGroup'));
+    if (!isCompleteDate(document.getElementById('f_birth').value)) errors.push(document.getElementById('f_birth'));
+    if (!document.querySelector('input[name="entry.706235477"]:checked')) errors.push(document.getElementById('revisitGroup'));
+    if (!document.querySelector('input[name="entry.902119748"]:checked')) errors.push(document.getElementById('healthGroup'));
+    if (!document.getElementById('f_privacy').checked) errors.push(document.getElementById('f_privacy'));
+    if (!document.getElementById('f_healthConsent').checked) errors.push(document.getElementById('f_healthConsent'));
+    if (!document.getElementById('f_noticeConsent').checked) errors.push(document.getElementById('f_noticeConsent'));
+
+    // 서명 작성 여부 체크
+    if (signaturePad.isEmpty()) {
+      errors.push(sigWrapper);
+    }
+
+    if (rvFirst.checked){
+      if (!document.querySelector('input[name="entry.2032403882"]:checked')) errors.push(firstSection);
+      var agreeBoxes = firstSection.querySelectorAll('input[name="entry.924576383"]');
+      var agreedCount = 0;
+      agreeBoxes.forEach(function(b){ if (b.checked) agreedCount++; });
+      if (agreedCount < agreeBoxes.length) errors.push(firstSection);
+    } else if (rvAgain.checked){
+      if (!document.querySelector('input[name="entry.1388254791"]:checked')) errors.push(revisitSection);
+    }
+
+    document.querySelectorAll('.err').forEach(function(el){ el.classList.remove('err'); });
+    errors.forEach(function(el){ if (el && el.classList) el.classList.add('err'); });
+
+    return errors.length === 0;
+  }
+
+  ['f_name','f_birth'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(){ this.classList.remove('err'); });
+  });
+
+  var submitBtn = document.getElementById('submitBtn');
+  var errorHint = document.getElementById('errorHint');
+  var loadingOverlay = document.getElementById('loadingOverlay');
+  var successOverlay = document.getElementById('successOverlay');
+
+  form.addEventListener('submit', function(e){
+    if (!validate()){
+      e.preventDefault();
+      errorHint.classList.add('show');
+      var firstErr = document.querySelector('.err');
+      if (firstErr) firstErr.scrollIntoView({ behavior:'smooth', block:'center' });
+      return;
+    }
+
+    // 검증 통과 시 Canvas 서명 그림을 Base64 문자열로 변환하여 hidden input에 삽입
+    sigHiddenInput.value = signaturePad.toDataURL("image/png");
+
+    // 첫방문(정액권 등록)인 경우 구매일을 오늘 날짜로 자동 채움
+    if (rvFirst.checked){
+      setDateHiddenToToday('entry.146931107');
+    }
+
+    errorHint.classList.remove('show');
+    submitBtn.disabled = true;
+    loadingOverlay.classList.add('show');
+
+    window.setTimeout(function(){
+      loadingOverlay.classList.remove('show');
+      successOverlay.classList.add('show');
+    }, 1300);
+  });
+
+  document.getElementById('closeSuccessBtn').addEventListener('click', function(){
+    successOverlay.classList.remove('show');
+    form.reset();
+    signaturePad.clear(); // 서명 초기화
+    document.querySelectorAll('.err').forEach(function(el){ el.classList.remove('err'); });
+    routeOtherText.classList.remove('show');
+    updateBranch();
+    submitBtn.disabled = false;
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+})();
+</script>
+
+</body>
+</html>

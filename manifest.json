@@ -1,0 +1,21 @@
+{
+  "id": "/hyosoon/index.html",
+  "name": "효소온 고객카드",
+  "short_name": "효소온",
+  "description": "효소온 고객 등록 및 방문 관리 카드",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FAF6F0",
+  "theme_color": "#3A2B1D",
+  "orientation": "portrait",
+  "lang": "ko",
+  "categories": ["business", "health", "lifestyle"],
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "img/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "img/icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "img/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

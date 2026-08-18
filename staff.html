@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>효소온 직원 조회</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brown-900:#3A2B1D; --brown-700:#4A3220; --brown-600:#6B4A2F;
+    --brown-400:#9C7C58; --brown-200:#E8DDD0; --brown-100:#F3EBE1;
+    --cream:#FAF6F0; --white:#FFFFFF; --ink:#3A2B1D; --muted2:#9C8B78;
+    --danger:#B5573C; --ok:#5C7A5E;
+    --shadow: 0 10px 30px rgba(74,50,32,0.08), 0 2px 8px rgba(74,50,32,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--cream);
+    font-family:'Noto Sans KR', -apple-system, 'Malgun Gothic', sans-serif;
+    color: var(--ink);
+    min-height:100vh;
+    padding: 24px 18px 60px;
+  }
+  .wrap{ max-width:640px; margin:0 auto; }
+  h1{
+    font-family:'Noto Serif KR', serif; font-weight:700; font-size:22px;
+    color: var(--brown-700); margin: 4px 0 22px;
+  }
+  .card{
+    background: var(--white); border-radius:18px; padding:22px;
+    box-shadow: var(--shadow); margin-bottom:16px;
+    border: 1px solid rgba(74,50,32,0.05);
+  }
+  label{ display:block; font-size:13.5px; font-weight:700; color:var(--brown-700); margin-bottom:8px; }
+  input[type="password"], input[type="text"]{
+    width:100%; border:1.5px solid var(--brown-200); background:var(--cream);
+    border-radius:12px; padding:12px 14px; font-size:15px; font-family:inherit;
+    color:var(--ink); outline:none; transition:border-color .15s, background .15s;
+  }
+  input:focus{ border-color: var(--brown-600); background:#fff; }
+  .btn{
+    width:100%; margin-top:12px; background:var(--brown-600); color:#fff; border:none;
+    border-radius:12px; padding:13px; font-size:14.5px; font-weight:700; font-family:inherit;
+    cursor:pointer;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .row{ display:flex; gap:8px; }
+  .row input{ flex:1; }
+  .row .btn{ width:auto; margin-top:0; padding:0 20px; }
+  .error{ color:var(--danger); font-size:12.5px; margin:10px 0 0; }
+  .hint{ font-size:12px; color:var(--muted2); margin: 8px 0 0; line-height:1.6; }
+
+  .result-card{
+    background:#fff; border-radius:16px; padding:18px 20px; box-shadow:var(--shadow);
+    margin-bottom:14px; border:1px solid rgba(74,50,32,0.05);
+  }
+  .result-card h2{
+    font-family:'Noto Serif KR', serif; font-size:18px; margin:0 0 4px; color:var(--brown-700);
+  }
+  .result-card .sub{ font-size:12.5px; color:var(--muted2); margin:0 0 12px; }
+  .kv{ font-size:13px; margin:5px 0; }
+  .kv b{ color:var(--brown-700); }
+  .health-box{
+    background:var(--brown-100); border-radius:12px; padding:10px 14px;
+    font-size:12.5px; margin:10px 0; line-height:1.6;
+  }
+  table.visits{ width:100%; border-collapse:collapse; margin-top:12px; font-size:12.5px; }
+  table.visits th{
+    background:var(--brown-600); color:#fff; padding:7px 8px; text-align:left; font-weight:700;
+  }
+  table.visits td{ padding:7px 8px; border-bottom:1px solid var(--brown-100); }
+  .empty{ text-align:center; color:var(--muted2); font-size:13px; padding:30px 0; }
+  .loading{ text-align:center; color:var(--muted2); font-size:13px; padding:20px 0; }
+
+  .sig-preview{ display:block; max-height:70px; border:1px solid var(--brown-200); border-radius:8px; margin-top:10px; }
+  .btn-pdf{
+    display:block; width:100%; margin-top:14px;
+    background:transparent; color:var(--brown-600);
+    border:1.5px solid var(--brown-400); border-radius:10px;
+    padding:9px; font-size:12.5px; font-weight:700; font-family:inherit; cursor:pointer;
+  }
+
+  /* PDF 저장(인쇄) 전용 화면 - 평소에는 숨김, 인쇄할 때만 보임 */
+  .print-only{ display:none; }
+  @media print{
+    body *{ visibility:hidden; }
+    .print-only, .print-only *{ visibility:visible; }
+    .print-only{ display:block; position:absolute; top:0; left:0; width:100%; padding:24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>효소온 직원 조회</h1>
+
+  <div class="card" id="gateCard">
+    <label>직원 비밀번호</label>
+    <input type="password" id="pwInput" placeholder="비밀번호를 입력해주세요" autocomplete="off">
+    <button class="btn" id="pwSubmit">입장</button>
+    <p class="error" id="gateError"></p>
+  </div>
+
+  <div class="card" id="searchCard" style="display:none;">
+    <label>이름 또는 휴대폰번호로 검색</label>
+    <div class="row">
+      <input type="text" id="searchInput" placeholder="예: 홍길동 또는 01012345678" autocomplete="off">
+      <button class="btn" id="searchBtn">조회</button>
+    </div>
+    <p class="hint">일부만 입력해도 검색됩니다. (예: "010" 또는 "홍" 등)</p>
+  </div>
+
+  <div id="resultsWrap"></div>
+</div>
+
+<!-- 인쇄(PDF 저장) 전용 화면. 평소에는 숨겨져 있고, PDF 저장 버튼을 누르면 내용이 채워진 뒤 인쇄됨 -->
+<div class="print-only" id="printSummary"></div>
+
+<script>
+(function(){
+  // Apps Script 웹앱 배포 후 나오는 URL을 여기 붙여넣어야 동작합니다.
+  var WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwY_yglwMEQba6Wkd_UpFti986wsm6YCgvobMFhdDizZ96KHTxs6G7chVl_F7VVKrZk/exec";
+
+  var gateCard = document.getElementById('gateCard');
+  var searchCard = document.getElementById('searchCard');
+  var gateError = document.getElementById('gateError');
+  var resultsWrap = document.getElementById('resultsWrap');
+
+  function showSearchScreen(){
+    gateCard.style.display = 'none';
+    searchCard.style.display = 'block';
+    document.getElementById('searchInput').focus();
+  }
+
+  // 세션 동안만 비밀번호를 기억 (탭을 닫으면 사라짐)
+  if (sessionStorage.getItem('staffKey')) {
+    showSearchScreen();
+  }
+
+  document.getElementById('pwSubmit').addEventListener('click', function(){
+    var pw = document.getElementById('pwInput').value;
+    if (!pw) return;
+    sessionStorage.setItem('staffKey', pw);
+    gateError.textContent = '';
+    showSearchScreen();
+  });
+  document.getElementById('pwInput').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') document.getElementById('pwSubmit').click();
+  });
+
+  document.getElementById('searchBtn').addEventListener('click', doSearch);
+  document.getElementById('searchInput').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') doSearch();
+  });
+
+  function doSearch(){
+    var q = document.getElementById('searchInput').value.trim();
+    if (!q) return;
+    var key = sessionStorage.getItem('staffKey');
+    resultsWrap.innerHTML = '<p class="loading">조회 중...</p>';
+
+    var url = WEBAPP_URL + '?key=' + encodeURIComponent(key) + '&q=' + encodeURIComponent(q);
+    fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      if (!data.ok) {
+        resultsWrap.innerHTML = '';
+        if (String(data.error || '').indexOf('비밀번호') > -1) {
+          sessionStorage.removeItem('staffKey');
+          gateError.textContent = data.error;
+          gateCard.style.display = 'block';
+          searchCard.style.display = 'none';
+        } else {
+          resultsWrap.innerHTML = '<p class="empty">' + data.error + '</p>';
+        }
+        return;
+      }
+      renderResults(data.results);
+    }).catch(function(){
+      resultsWrap.innerHTML = '<p class="empty">조회 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>';
+    });
+  }
+
+  var lastResults = [];
+
+  function renderResults(results){
+    lastResults = results || [];
+    if (!results || !results.length){
+      resultsWrap.innerHTML = '<p class="empty">검색 결과가 없습니다.</p>';
+      return;
+    }
+    resultsWrap.innerHTML = results.map(renderCard).join('');
+  }
+
+  resultsWrap.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('.btn-pdf') : null;
+    if (!btn) return;
+    var idx = Number(btn.getAttribute('data-idx'));
+    var c = lastResults[idx];
+    if (c) printCustomer(c);
+  });
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c];
+    });
+  }
+
+  // 숫자만 있는 휴대폰번호("01096684629")도 010-0000-0000 형태로 하이픈을 붙여서 보여줌
+  function formatPhone(raw){
+    var digits = String(raw || '').replace(/[^0-9]/g, '');
+    if (!digits) return '';
+    if (digits.length === 11) return digits.slice(0,3) + '-' + digits.slice(3,7) + '-' + digits.slice(7);
+    if (digits.length === 10) {
+      return digits.indexOf('02') === 0
+        ? digits.slice(0,2) + '-' + digits.slice(2,6) + '-' + digits.slice(6)
+        : digits.slice(0,3) + '-' + digits.slice(3,6) + '-' + digits.slice(6);
+    }
+    return digits;
+  }
+
+  function renderCard(c, idx){
+    var visitsHtml = (c.visits || []).map(function(v){
+      return '<tr><td>' + esc(v.date) + '</td><td>' + esc(v.content) + '</td><td>' + esc(v.extra) + '</td><td>' + esc(v.after) + '</td></tr>';
+    }).join('');
+
+    var healthLine = c.healthCheck ? esc(c.healthCheck) : '해당 없음';
+    if (c.healthOther) healthLine += ' / 기타: ' + esc(c.healthOther);
+
+    var checklistHtml = (c.checklist && c.checklist.length)
+      ? '<div class="health-box"><b>첫방문 체크리스트:</b>' +
+        '<ul style="margin:6px 0 0;padding:0;list-style:none;">' +
+        c.checklist.map(function(item){
+          var isYes = item.answer === '네';
+          var color = isYes ? 'var(--brown-600)' : 'var(--muted2)';
+          return '<li style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;">' +
+            '<span>' + esc(item.label) + '</span>' +
+            '<b style="color:' + color + ';flex-shrink:0;">' + esc(item.answer || '-') + '</b>' +
+          '</li>';
+        }).join('') +
+        '</ul></div>'
+      : '';
+
+    return '' +
+      '<div class="result-card">' +
+        '<h2>' + esc(c.name) + '</h2>' +
+        '<p class="sub">' + esc(formatPhone(c.phone)) + (c.gender ? ' · ' + esc(c.gender) : '') + (c.birth ? ' · ' + esc(c.birth) : '') + '</p>' +
+        '<div class="kv"><b>남은회원권:</b> ' + esc(c.remaining) + '</div>' +
+        (c.lastVisitDate ? '<div class="kv"><b>마지막 방문일:</b> ' + esc(c.lastVisitDate) + '</div>' : '') +
+        (c.note ? '<div class="kv"><b>비고:</b> ' + esc(c.note) + '</div>' : '') +
+        '<div class="health-box"><b>건강상태:</b> ' + healthLine + '</div>' +
+        checklistHtml +
+        (c.signatureUrl ? '<img class="sig-preview" src="' + esc(c.signatureUrl) + '" alt="고객 서명">' : '') +
+        (visitsHtml
+          ? '<table class="visits"><thead><tr><th>날짜</th><th>내용</th><th>결제회원권</th><th>남은회원권</th></tr></thead><tbody>' + visitsHtml + '</tbody></table>'
+          : '') +
+        '<button type="button" class="btn-pdf" data-idx="' + idx + '">PDF로 저장</button>' +
+      '</div>';
+  }
+
+  // 선택한 고객 정보를 인쇄 전용 화면에 채운 뒤 브라우저 인쇄(=PDF 저장) 실행.
+  // 서명은 구글 드라이브에서 불러오는 이미지라 로드가 끝난 뒤에 인쇄해야 빈 칸으로 찍히지 않는다.
+  function printCustomer(c){
+    function row(label, value){
+      return '<tr><td style="padding:7px 12px;background:#F3EBE1;font-weight:700;width:130px;border:1px solid #E8DDD0;">' + label + '</td>' +
+             '<td style="padding:7px 12px;border:1px solid #E8DDD0;">' + (value || '-') + '</td></tr>';
+    }
+    var visitsRows = (c.visits || []).map(function(v){
+      return '<tr><td style="padding:6px 8px;border:1px solid #E8DDD0;">' + esc(v.date) + '</td>' +
+             '<td style="padding:6px 8px;border:1px solid #E8DDD0;">' + esc(v.content) + '</td>' +
+             '<td style="padding:6px 8px;border:1px solid #E8DDD0;">' + esc(v.extra) + '</td>' +
+             '<td style="padding:6px 8px;border:1px solid #E8DDD0;">' + esc(v.after) + '</td></tr>';
+    }).join('');
+
+    var healthLine = c.healthCheck ? esc(c.healthCheck) : '해당 없음';
+    if (c.healthOther) healthLine += ' / 기타: ' + esc(c.healthOther);
+
+    var now = new Date();
+    var dateStr = now.getFullYear() + '.' + (now.getMonth() + 1) + '.' + now.getDate();
+
+    var html = '<div style="font-family:\'Noto Sans KR\',sans-serif;color:#3A2B1D;max-width:680px;margin:0 auto;">';
+    html += '<h1 style="font-family:\'Noto Serif KR\',serif;font-size:22px;margin:0 0 4px;">효소온 고객카드</h1>';
+    html += '<p style="font-size:12px;color:#9C8B78;margin:0 0 20px;">출력일: ' + dateStr + '</p>';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;">';
+    html += row('성함', esc(c.name));
+    html += row('휴대폰', esc(formatPhone(c.phone)));
+    html += row('성별', esc(c.gender));
+    html += row('생년월일', esc(c.birth));
+    html += row('남은회원권', esc(c.remaining));
+    html += row('마지막 방문일', esc(c.lastVisitDate));
+    html += row('건강상태', healthLine);
+    html += row('비고', esc(c.note));
+    html += '</table>';
+
+    if (c.checklist && c.checklist.length) {
+      html += '<h2 style="font-size:15px;margin:18px 0 8px;">첫방문 체크리스트</h2>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px;">' +
+        c.checklist.map(function(item){
+          return '<tr><td style="padding:6px 8px;border:1px solid #E8DDD0;">' + esc(item.label) + '</td>' +
+                 '<td style="padding:6px 8px;border:1px solid #E8DDD0;width:60px;">' + esc(item.answer || '-') + '</td></tr>';
+        }).join('') +
+        '</table>';
+    }
+
+    if (visitsRows) {
+      html += '<h2 style="font-size:15px;margin:18px 0 8px;">방문 이력</h2>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+              '<thead><tr>' +
+                '<th style="padding:6px 8px;background:#6B4A2F;color:#fff;text-align:left;">날짜</th>' +
+                '<th style="padding:6px 8px;background:#6B4A2F;color:#fff;text-align:left;">내용</th>' +
+                '<th style="padding:6px 8px;background:#6B4A2F;color:#fff;text-align:left;">결제회원권</th>' +
+                '<th style="padding:6px 8px;background:#6B4A2F;color:#fff;text-align:left;">남은회원권</th>' +
+              '</tr></thead><tbody>' + visitsRows + '</tbody></table>';
+    }
+
+    html += '<h2 style="font-size:15px;margin:18px 0 8px;">고객 서명</h2>';
+    html += c.signatureUrl
+      ? '<img id="printSigImg" src="' + esc(c.signatureUrl) + '" style="height:80px;border:1px solid #ccc;">'
+      : '<p style="font-size:12px;">서명 없음</p>';
+    html += '</div>';
+
+    document.getElementById('printSummary').innerHTML = html;
+
+    var img = document.getElementById('printSigImg');
+    if (img && !img.complete) {
+      img.addEventListener('load', function(){ window.print(); });
+      img.addEventListener('error', function(){ window.print(); });
+    } else {
+      window.print();
+    }
+  }
+})();
+</script>
+
+</body>
+</html>
