@@ -254,11 +254,19 @@
       : '';
 
     // 비고: 기본은 접힌 상태, 눌러야 펼쳐진다 (<details>는 브라우저 기본 기능이라 별도 JS 불필요)
-    var noteSource = (c.notes && c.notes.length)
-      ? c.notes
-      : (c.visits || []).filter(function(v){ return v.note; });
-    var noteItems = noteSource.map(function(v){
-      return '<div class="kv"><b>' + esc(v.date || '') + '</b> ' + esc(v.note) + '</div>';
+    // 역대 방문일 전체를 "방문날짜 - 비고" 한 줄씩. 비고가 없는 방문일도 날짜만 표시한다.
+    var noteByDate = {};
+    (c.notes || []).forEach(function(n){ if (n.date) noteByDate[n.date] = n.note; });
+    (c.visits || []).forEach(function(v){ if (v.date && v.note && !noteByDate[v.date]) noteByDate[v.date] = v.note; });
+
+    var dates = [];
+    (c.visits || []).forEach(function(v){ if (v.date && dates.indexOf(v.date) < 0) dates.push(v.date); });
+    Object.keys(noteByDate).forEach(function(d){ if (dates.indexOf(d) < 0) dates.push(d); });
+    dates.sort().reverse();
+
+    var noteItems = dates.map(function(d){
+      var n = noteByDate[d];
+      return '<div class="kv"><b>' + esc(d) + '</b>' + (n ? ' - ' + esc(n) : '') + '</div>';
     });
     if (!noteItems.length && c.note) noteItems.push('<div class="kv">' + esc(c.note) + '</div>');
     var noteHtml = noteItems.length
