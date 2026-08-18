@@ -205,12 +205,42 @@
   }
 
   resultsWrap.addEventListener('click', function(e){
+    var save = e.target.closest ? e.target.closest('.deduct-save') : null;
+    if (save) { saveDeduct(save); return; }
+
     var btn = e.target.closest ? e.target.closest('.btn-pdf') : null;
     if (!btn) return;
     var idx = Number(btn.getAttribute('data-idx'));
     var c = lastResults[idx];
     if (c) printCustomer(c);
   });
+
+  // 차감횟수를 시트에 저장한 뒤, 남은회원권이 다시 계산되도록 조회를 새로고침한다.
+  function saveDeduct(btn){
+    var input = btn.parentNode.querySelector('.deduct-input');
+    var value = input ? input.value : '';
+    if (value === '' || Number(value) < 0) { alert('차감횟수를 0 이상으로 입력해주세요.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = '저장중';
+
+    var key = sessionStorage.getItem('staffKey');
+    var url = WEBAPP_URL + '?key=' + encodeURIComponent(key) +
+      '&action=deduct&row=' + encodeURIComponent(btn.getAttribute('data-row')) +
+      '&value=' + encodeURIComponent(value);
+
+    fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      if (!data.ok) {
+        alert(data.error || '저장에 실패했습니다.');
+        btn.disabled = false; btn.textContent = '저장';
+        return;
+      }
+      doSearch();
+    }).catch(function(){
+      alert('저장 중 오류가 발생했습니다.');
+      btn.disabled = false; btn.textContent = '저장';
+    });
+  }
 
   function esc(s){
     return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -233,7 +263,16 @@
 
   function renderCard(c, idx){
     var visitsHtml = (c.visits || []).map(function(v){
-      return '<tr><td>' + esc(v.date) + '</td><td>' + esc(v.content) + '</td><td>' + esc(v.extra) + '</td><td>' + esc(v.after) + '</td></tr>';
+      // 차감횟수는 기본 1회로 채워져 있고, 직원이 숫자를 고쳐 저장할 수 있다.
+      var deductCell = v.row
+        ? '<input type="number" class="deduct-input" min="0" step="1" value="' + esc(v.deduct) + '"' +
+            ' style="width:44px;padding:3px;border:1px solid #E8DDD0;border-radius:5px;font-size:12px;text-align:center;">' +
+          '<button type="button" class="deduct-save" data-row="' + esc(v.row) + '"' +
+            ' style="margin-left:4px;padding:3px 7px;font-size:11px;border:0;border-radius:5px;background:var(--brown-600);color:#fff;cursor:pointer;">저장</button>'
+        : esc(v.deduct);
+      return '<tr><td>' + esc(v.date) + '</td><td>' + esc(v.content) + '</td>' +
+             '<td style="white-space:nowrap;">' + deductCell + '</td>' +
+             '<td>' + esc(v.extra) + '</td><td>' + esc(v.after) + '</td></tr>';
     }).join('');
 
     var healthLine = c.healthCheck ? esc(c.healthCheck) : '해당 없음';
@@ -284,7 +323,7 @@
         checklistHtml +
         (c.signatureUrl ? '<img class="sig-preview" src="' + esc(c.signatureUrl) + '" alt="고객 서명">' : '') +
         (visitsHtml
-          ? '<table class="visits"><thead><tr><th>날짜</th><th>내용</th><th>결제회원권</th><th>남은회원권</th></tr></thead><tbody>' + visitsHtml + '</tbody></table>'
+          ? '<table class="visits"><thead><tr><th>날짜</th><th>내용</th><th>차감</th><th>결제회원권</th><th>남은회원권</th></tr></thead><tbody>' + visitsHtml + '</tbody></table>'
           : '') +
         '<button type="button" class="btn-pdf" data-idx="' + idx + '">PDF로 저장</button>' +
       '</div>';
