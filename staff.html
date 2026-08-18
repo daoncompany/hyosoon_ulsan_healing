@@ -319,31 +319,27 @@
       : '';
 
     // 비고: 기본은 접힌 상태, 눌러야 펼쳐진다 (<details>는 브라우저 기본 기능이라 별도 JS 불필요)
-    // 역대 방문일 전체를 "방문날짜 - 비고" 한 줄씩. 비고가 없는 방문일도 날짜만 표시한다.
-    var noteByDate = {};
-    (c.notes || []).forEach(function(n){ if (n.date) noteByDate[n.date] = n.note; });
-    (c.visits || []).forEach(function(v){ if (v.date && v.note && !noteByDate[v.date]) noteByDate[v.date] = v.note; });
+    // 역대 비고를 하나도 빠짐없이 "방문날짜 - 비고" 한 줄씩. 같은 날짜에 여러 건이 있어도 각각 나온다.
+    function readonlyNote(date, note){
+      return '<div class="kv"><b>' + esc(date) + '</b>' + (note ? ' - ' + esc(note) : '') + '</div>';
+    }
 
-    var dates = [];
-    (c.visits || []).forEach(function(v){ if (v.date && dates.indexOf(v.date) < 0) dates.push(v.date); });
-    Object.keys(noteByDate).forEach(function(d){ if (dates.indexOf(d) < 0) dates.push(d); });
-    dates.sort().reverse();
-
-    // 재방문 기록이 있는 날짜는 비고를 그 자리에서 고쳐 저장할 수 있다.
-    var rowByDate = {};
-    (c.visits || []).forEach(function(v){ if (v.date && v.row && !(v.date in rowByDate)) rowByDate[v.date] = v.row; });
-
-    var noteItems = dates.map(function(d){
-      var n = noteByDate[d] || '';
-      var row = rowByDate[d];
-      if (!row) return '<div class="kv"><b>' + esc(d) + '</b>' + (n ? ' - ' + esc(n) : '') + '</div>';
+    var noteItems = (c.visits || []).map(function(v){
+      if (!v.row) return readonlyNote(v.date, v.note);
       return '<div class="kv" style="display:flex;gap:6px;align-items:center;">' +
-        '<b style="flex-shrink:0;">' + esc(d) + '</b>' +
-        '<input type="text" class="note-input" value="' + esc(n) + '" placeholder="비고 입력"' +
+        '<b style="flex-shrink:0;">' + esc(v.date) + '</b>' +
+        '<input type="text" class="note-input" value="' + esc(v.note || '') + '" placeholder="비고 입력"' +
           ' style="flex:1;min-width:0;padding:4px 6px;border:1px solid #E8DDD0;border-radius:5px;font-size:12px;">' +
-        '<button type="button" class="note-save" data-row="' + esc(row) + '"' +
+        '<button type="button" class="note-save" data-row="' + esc(v.row) + '"' +
           ' style="flex-shrink:0;padding:4px 8px;font-size:11px;border:0;border-radius:5px;background:var(--brown-600);color:#fff;cursor:pointer;">저장</button>' +
       '</div>';
+    });
+
+    // 방문 기록에는 안 잡히지만 시트에 남아있는 비고(기존회원 등록분 등)도 읽기 전용으로 덧붙인다.
+    (c.notes || []).forEach(function(n){
+      if (!n.note) return;
+      var already = (c.visits || []).some(function(v){ return v.date === n.date && (v.note || '') === n.note; });
+      if (!already) noteItems.push(readonlyNote(n.date, n.note));
     });
     if (!noteItems.length && c.note) noteItems.push('<div class="kv">' + esc(c.note) + '</div>');
     var noteHtml = noteItems.length
