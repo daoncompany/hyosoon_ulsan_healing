@@ -254,7 +254,10 @@
       : '';
 
     // 비고: 기본은 접힌 상태, 눌러야 펼쳐진다 (<details>는 브라우저 기본 기능이라 별도 JS 불필요)
-    var noteItems = (c.visits || []).filter(function(v){ return v.note; }).map(function(v){
+    var noteSource = (c.notes && c.notes.length)
+      ? c.notes
+      : (c.visits || []).filter(function(v){ return v.note; });
+    var noteItems = noteSource.map(function(v){
       return '<div class="kv"><b>' + esc(v.date || '') + '</b> ' + esc(v.note) + '</div>';
     });
     if (!noteItems.length && c.note) noteItems.push('<div class="kv">' + esc(c.note) + '</div>');
