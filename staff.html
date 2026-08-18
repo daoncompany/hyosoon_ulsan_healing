@@ -302,7 +302,9 @@
     var healthLine = c.healthCheck ? esc(c.healthCheck) : '해당 없음';
     if (c.healthOther) healthLine += ' / 기타: ' + esc(c.healthOther);
 
-    var checklistHtml = (c.checklist && c.checklist.length)
+    // 첫방문 체크리스트(토글형) 비활성화 — 다시 보이려면 아래 var checklistHtml = ''; 줄을 지우세요.
+    var checklistHtml = '';
+    var checklistHtmlDisabled = (c.checklist && c.checklist.length)
       ? '<div class="health-box"><b>첫방문 체크리스트:</b>' +
         '<ul style="margin:6px 0 0;padding:0;list-style:none;">' +
         c.checklist.map(function(item){
@@ -401,7 +403,8 @@
     html += row('비고', esc(c.note));
     html += '</table>';
 
-    if (c.checklist && c.checklist.length) {
+    // 첫방문 체크리스트(토글형) 비활성화 — 다시 보이려면 아래 false && 를 지우세요.
+    if (false && c.checklist && c.checklist.length) {
       html += '<h2 style="font-size:15px;margin:18px 0 8px;">첫방문 체크리스트</h2>';
       html += '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px;">' +
         c.checklist.map(function(item){
