@@ -337,10 +337,12 @@
              '<td style="padding:7px 12px;border:1px solid #E8DDD0;">' + (value || '-') + '</td></tr>';
     }
     var visitsRows = (c.visits || []).map(function(v){
-      return '<tr><td style="padding:6px 8px;border:1px solid #E8DDD0;">' + esc(v.date) + '</td>' +
-             '<td style="padding:6px 8px;border:1px solid #E8DDD0;">' + esc(v.content) + '</td>' +
-             '<td style="padding:6px 8px;border:1px solid #E8DDD0;">' + esc(v.extra) + '</td>' +
-             '<td style="padding:6px 8px;border:1px solid #E8DDD0;">' + esc(v.after) + '</td></tr>';
+      var td = 'padding:6px 8px;border:1px solid #E8DDD0;';
+      return '<tr><td style="' + td + '">' + esc(v.date) + '</td>' +
+             '<td style="' + td + '">' + esc(v.content) + '</td>' +
+             '<td style="' + td + 'text-align:center;">' + esc(v.deduct) + '</td>' +
+             '<td style="' + td + '">' + esc(v.extra) + '</td>' +
+             '<td style="' + td + '">' + esc(v.after) + '</td></tr>';
     }).join('');
 
     var healthLine = c.healthCheck ? esc(c.healthCheck) : '해당 없음';
@@ -379,6 +381,7 @@
               '<thead><tr>' +
                 '<th style="padding:6px 8px;background:#6B4A2F;color:#fff;text-align:left;">날짜</th>' +
                 '<th style="padding:6px 8px;background:#6B4A2F;color:#fff;text-align:left;">내용</th>' +
+                '<th style="padding:6px 8px;background:#6B4A2F;color:#fff;text-align:left;">차감</th>' +
                 '<th style="padding:6px 8px;background:#6B4A2F;color:#fff;text-align:left;">결제회원권</th>' +
                 '<th style="padding:6px 8px;background:#6B4A2F;color:#fff;text-align:left;">남은회원권</th>' +
               '</tr></thead><tbody>' + visitsRows + '</tbody></table>';
