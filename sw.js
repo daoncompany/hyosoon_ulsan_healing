@@ -1,7 +1,7 @@
 // PWA(설치 가능한 웹앱) 서비스 워커.
 // 우리 사이트(같은 출처)의 정적 파일만 캐싱해서 오프라인/재방문 시 빠르게 뜨도록 하고,
 // 구글 폼 제출 등 다른 사이트로 나가는 요청은 절대 건드리지 않고 그대로 통과시킨다.
-var CACHE_NAME = 'hyosoon-v2';
+var CACHE_NAME = 'hyosoon-hyosoon_ulsan_healing-v1';
 var APP_SHELL = [
   './',
   './index.html',
